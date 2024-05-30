@@ -10,9 +10,11 @@ namespace GuestBook.Models
 		// текст сообщения
 		[Required(ErrorMessage = "Вы не можете отправить пустое сообщение")]
 		[StringLength(1000, ErrorMessage = "Сообщение не может быть более 1000 символов")]
+		[Display(Name = "Текст сообщения")]
 		public string? MessageContent { get; set; }
 
 		// время и дата сообщения
+		[Display(Name = "Дата отправки сообщения")]
 		public DateTime MessageDate { get; set; }
 
 		// внешний ключ для связи с пользователем, который отправил сообщение
