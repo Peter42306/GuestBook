@@ -1,0 +1,89 @@
+﻿@model GuestBook.Models.LoginModel
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h6>Views/Account/Login</h6>
+<h6>Вход в систему -> на страницу авторизации</h6>
+<h6>Мы на странице авторизации</h6>
+<hr />
+
+<div class="row">
+    <div>
+        <form asp-action="Login">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control"/>
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Password" class="control-label"></label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="form-group">                
+                <input type="submit" value="Вход в систему" class="btn btn-primary" />                
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+@* <!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta charset="utf-8" />
+    <title>Авторизация</title>
+</head> 
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        <div>
+            @if (this.Context.Request.Cookies["login"] == null)
+            {
+                @Html.ValidationSummary(true, "")
+                <div>
+                    @Html.LabelFor(model => model.Name)
+                    <div>
+                        @Html.EditorFor(model => model.Name)
+                        @Html.ValidationMessageFor(model => model.Name, "")
+                    </div>
+                </div>
+
+                <div>
+                    @Html.LabelFor(model => model.Password)
+                    <div>
+                        @Html.PasswordFor(model => model.Password)
+                        @Html.ValidationMessageFor(model => model.Password, "")
+                    </div>
+                </div>
+
+                <div>
+                    <div>
+                        <input type="submit" value="Войти" />
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div>
+                    <div>
+                        Вводить логин и пароль уже не нужно!
+                    </div>
+                    @Html.ActionLink("Создать сообщение", "Create", "Messages")
+                </div>
+            }
+        </div>
+    }
+</body>
+</html> *@
+
+
+

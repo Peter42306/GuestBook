@@ -1,0 +1,41 @@
+﻿@model GuestBook.Models.Message
+
+@{
+    ViewData["Title"] = "Create Message";
+}
+
+<h6>Views/Messages/Create</h6>
+<h6>Создание сообщения</h6>
+<h6>Мы на странице создания нового сообщения</h6>
+<hr />
+<h6>Привет пользователь @Context.Session.GetString("Name") !!! Можешь писать своё сообщение</h6>
+
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div class="form-group">
+                <label asp-for="MessageContent" class="control-label"></label>
+                <textarea asp-for="MessageContent" class="form-control"></textarea>
+                <span asp-validation-for="MessageContent" class="text-danger"></span>
+            </div>
+            <div class="form-group">                
+                <input type="submit" value="Добавить сообщение в базу данных" class="btn btn-primary"/>                
+            </div>
+            <div class="form-group">
+                <a asp-action="Logout" asp-controller="Account" class="btn btn-primary">Выход из системы на домашнюю страницу</a>
+            </div>
+            <div>
+                <a asp-action="Logout" asp-controller="Account">Выход из системы на домашнюю страницу</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Logout" asp-controller="Account">Выход из системы на домашнюю страницу</a>
+</div>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

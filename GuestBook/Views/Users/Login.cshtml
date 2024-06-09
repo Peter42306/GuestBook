@@ -1,0 +1,65 @@
+﻿@model GuestBook.Models.LoginModel
+
+@{
+	ViewData["Title"] = "Гостевой режим";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h6>Users/Login</h6>
+<h6>Вход в систему -> на страницу авторизации</h6>
+<h6></h6>
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta charset="utf-8" />
+    <title>Авторизация</title>
+</head>
+<body>
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        <div>
+            @if (this.Context.Request.Cookies["login"] == null)
+            {
+                @Html.ValidationSummary(true, "")
+                <div>
+                    @Html.LabelFor(model => model.Name)
+                    <div>
+                        @Html.EditorFor(model => model.Name)
+                        @Html.ValidationMessageFor(model => model.Name, "")
+                    </div>
+                </div>
+
+                <div>
+                    @Html.LabelFor(model => model.Password)
+                    <div>
+                        @Html.PasswordFor(model => model.Password)
+                        @Html.ValidationMessageFor(model => model.Password, "")
+                    </div>
+                </div>
+
+                <div>
+                    <div>
+                        <input type="submit" value="Войти" />
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div>
+                    <div>
+                        Вводить логин и пароль уже не нужно!
+                    </div>
+                    @Html.ActionLink("Создать сообщение", "Create", "Messages")
+                </div>
+            }
+        </div>
+    }
+</body>
+</html>
+
+
+

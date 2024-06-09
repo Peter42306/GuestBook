@@ -1,17 +1,17 @@
 ﻿@model IEnumerable<GuestBook.Models.Message>
 
 @{
-	ViewData["Title"] = "Index";
+	ViewData["Title"] = "Гостевой режим";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h6>GuestBook/Index</h6>
-<h6>Гостевой режим</h6>
+<h6>View/GuestBook/Index</h6>
+<h6>Title -> Гостевой режим</h6>
 <h6>Есть возможность только читать сообщения</h6>
 
 <p>
-	<a asp-controller="Users" asp-action="Login" class="btn btn-primary">Вход в систему</a>
-	<a asp-controller="Users" asp-action="Registration" class="btn btn-primary">Регистрация</a>
+	<a asp-controller="Account" asp-action="Login" class="btn btn-primary">Вход в систему</a>
+	<a asp-controller="Account" asp-action="Register" class="btn btn-primary">Регистрация</a>
 </p>
 
 <table class="table table-striped">
