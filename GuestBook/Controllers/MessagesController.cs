@@ -44,7 +44,7 @@ namespace GuestBook.Controllers
                     _context.Messages.Add(message);
                     _context.SaveChanges();
 
-                    return RedirectToAction(nameof(Index),"GuestBook");                
+                    return RedirectToAction(nameof(Create),"Messages");                
                 }
                 else
                 {

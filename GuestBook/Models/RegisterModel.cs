@@ -18,7 +18,7 @@ namespace GuestBook.Models
         [Display(Name = "Пароль")]
         public string Password { get; set; }
 
-        [Required]
+        [Required(ErrorMessage ="Введите подтверждение пароля")]
         [Compare("Password",ErrorMessage ="Подтверждённый пароль не соответствует")]
         [Display(Name = "Подтверждение пароля")]
         public string PasswordConfirm { get; set; }
