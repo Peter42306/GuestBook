@@ -6,9 +6,15 @@ using GuestBook.Helpers;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
 
 namespace GuestBook.Controllers
-{
+{    
+    /// <summary>
+    /// Контроллер отвечает за управление учетными записями пользователей              
+    /// _context содержит ссылку на контекст базы данных
+    /// Конструктор принимает контекст базы данных GuestBookContext для взаимодействия с базой данных
+    /// </summary>
     public class AccountController : Controller
     {
         private readonly GuestBookContext _context;
@@ -19,12 +25,30 @@ namespace GuestBook.Controllers
         }
 
         //==============================================================
-
+        // GET: Account/Login        
+        /// <summary>
+        /// Отображает страницу входа пользователя
+        /// </summary>
+        /// <returns>Представление страницы входа пользователя</returns>
         public IActionResult Login()
         {
-            return View();
+            var cookieValue = Request.Cookies["login"]; // Проверка наличия куки
+
+            if (!string.IsNullOrEmpty(cookieValue))
+            {
+                HttpContext.Session.SetString("Name", cookieValue);// Сохранение имени пользователя в сессии
+
+                return RedirectToAction("Create", "Messages");// Пользователь уже залогинен, перенаправляем на страницу создания сообщений
+            }
+            return View(); // Представление страницы входа пользователя
         }
 
+        // POST: Account/Login        
+        /// <summary>
+        /// Обрабатывает запрос на вход пользователя
+        /// </summary>
+        /// <param name="loginModel">Модель данных для входа</param>
+        /// <returns>Редирект на страницу создания сообщений в случае успешного входа, иначе возвращает представление страницы входа с сообщениями об ошибках</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginModel loginModel)
@@ -32,70 +56,83 @@ namespace GuestBook.Controllers
             if (ModelState.IsValid)
             {
                 // Проверяется, есть ли вообще пользователи в базе данных.
-                if (_context.Users.ToList().Count==0)
+                if (!_context.Users.Any())
                 {
                     ModelState.AddModelError("", "В базе данных ещё нет пользователей");
                     return View(loginModel);
                 }
 
-                // Поиск пользователя с указанным логином. Если такой пользователь не найден, выводится сообщение об ошибке
-                var users = _context.Users.Where(u => u.Name == loginModel.Name);
-                if (users.ToList().Count==0)
+                var user = _context.Users.SingleOrDefault(u => u.Name == loginModel.Name);// Поиск пользователя с указанным логином. Если такой пользователь не найден, выводится сообщение об ошибке
+
+                if (user == null)
                 {
                     ModelState.AddModelError("", "В базе данных такой пользователь не найден");
+                    return View(loginModel);
                 }
 
-                // Получается первый(и, предположительно, единственный) пользователь с данным логином
-                var user=users.First();
-                                
 
                 // Проверка пароля
-                if (user.Password != Utilities.HashPassword(loginModel.Password,user.Salt))
+                if (user.Password != Utilities.HashPassword(loginModel.Password, user.Salt))
                 {
                     ModelState.AddModelError("", "Неверный пароль");
                     return View(loginModel);
                 }
 
 
-                // Создание Claims
+                // Создание Claims, (утверждение) представляет единичную информацию о пользователе (например, его имя)
+                // Создание списка утверждений, создается новый список List<Claim>, который будет содержать утверждения для текущего пользователя
+                // Добавление утверждения. В список добавляется новое утверждение (Claim), где тип утверждения (ClaimTypes.Name) указывает, что это имя пользователя, а user.Name содержит значение имени
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name,user.Name)
                 };
 
+                // Создание ClaimsIdentity
+                // Назначение: ClaimsIdentity представляет собой идентичность пользователя, которая может содержать одно или несколько утверждений
+                // Передача списка утверждений: Здесь создается объект ClaimsIdentity, принимающий список утверждений(claims), созданный ранее
+                // Указание схемы аутентификации: Второй параметр указывает схему аутентификации, используемую для этих утверждений. В данном случае используется схема аутентификации куки - файлов(CookieAuthenticationDefaults.AuthenticationScheme)
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
+                // аутентифиция пользователя, создавая для него сессию с использованием куки
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
+                // Создание и установка куки при успешной аутентификации
+                CookieOptions cookieOptions = new CookieOptions() { Expires = DateTime.Now.AddDays(1) };
+                Response.Cookies.Append("login", user.Name, cookieOptions);
 
+                HttpContext.Session.SetString("Name", user.Name); // Сохранение информации о пользователе в сессии
 
-                //// Проверка пароля
-                //if (user.Password!=hash.ToString())
-                //{
-                //    ModelState.AddModelError("", "Неверный пароль");
-                //    return View(loginModel);
-                //}
-
-                // Сохранение информации о пользователе в сессии
-                HttpContext.Session.SetString("Name", user.Name);
-                return RedirectToAction("Create", "Messages");
+                return RedirectToAction("Create", "Messages");// перенаправляет пользователя на страницу создания сообщения, вызвав метод Create в контроллере Messages
             }
-            return View(loginModel);
+
+            return View(loginModel);// представление Login будет возвращено вместе с моделью loginModel, что позволяет пользователю видеть введенные данные и сообщения об ошибках
         }
 
         //==============================================================
-
+        // GET: Account/Register
+        // для отображения страницы регистрации
+        /// <summary>
+        /// Отображает страницу регистрации нового пользователя
+        /// </summary>
+        /// <returns>Представление страницы регистрации</returns>
         public IActionResult Register()
         {
             return View();
         }
 
+        // POST: Account/Register
+        // Обрабатывает запрос на регистрацию нового пользователя
+        /// <summary>
+        /// Регистрирует нового пользователя
+        /// </summary>
+        /// <param name="registerModel">Модель данных для регистрации</param>
+        /// <returns>При успешной регистрации перенаправляет на страницу входа, иначе возвращает представление с моделью данных для исправления ошибок</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Register(RegisterModel registerModel)
         {
             // Проверка на существование пользователя с таким же именем в базе данных
-            if (_context.Users.Any(u=>u.Name==registerModel.Name))
+            if (_context.Users.Any(u => u.Name == registerModel.Name))
             {
                 ModelState.AddModelError("Name", "Пользователь с таким именем уже существует в базе данных");
             }
@@ -103,56 +140,38 @@ namespace GuestBook.Controllers
             // Если модель проходит валидацию, сохраняем пользователя в базе данных
             if (ModelState.IsValid)
             {
-                User user = new User();
-                user.Name = registerModel.Name;
+                User user = new User(); // Создаем новый объект пользователя
+                user.Name = registerModel.Name; // Генерируем случайную строку (соль) для шифрования пароля
 
-                string salt = Utilities.GenerateSalt();
-                user.Password = Utilities.HashPassword(registerModel.Password, salt);
-                user.Salt = salt;
+                string salt = Utilities.GenerateSalt(); // Генерируем случайную строку (соль) для шифрования пароля
+                user.Password = Utilities.HashPassword(registerModel.Password, salt); // // Хешируем пароль из модели регистрации, используя соль, и устанавливаем хешированный пароль в объект пользователя
+                user.Salt = salt; // Устанавливаем соль в объект пользователя
 
-                _context.Users.Add(user);
-                _context.SaveChanges();
+                _context.Users.Add(user); // Добавляем пользователя в контекст базы данных
+                _context.SaveChanges(); // Сохраняем изменения в базе данных
+                                
+                CookieOptions cookieOptions = new CookieOptions(); // При успешной регистрации устанавливаем куки для аутентификации пользователя
+                cookieOptions.Expires = DateTime.Now.AddDays(1); // Устанавливаем срок действия куки на 1 день
+                Response.Cookies.Append("login", registerModel.Name, cookieOptions); // Добавляем куки в ответ с именем пользователя, чтобы позже использовать его для аутентификации
 
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction("Login", "Account"); // Перенаправляем пользователя на страницу входа после успешной регистрации
             }
-            return View(registerModel);
-        }        
-
-        //==============================================================
-
-        public ActionResult Logout()
-        {
-            HttpContext.Session.Clear();
-            return RedirectToAction("Index", "GuestBook");
+            return View(registerModel); // Возвращаем представление с моделью регистрации для отображения ошибок валидации
         }
 
-
-
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public IActionResult Login(User login)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        CookieOptions cookieOptions = new CookieOptions();
-        //        cookieOptions.Expires = DateTime.Now.AddMinutes(1);
-        //        //cookieOptions.Expires = DateTime.Now.AddDays(10);
-        //        Response.Cookies.Append("login", login.Name, cookieOptions);
-        //        return RedirectToAction();
-        //    }
-        //    return View(login);
-        //}
-
         //==============================================================
+        /// <summary>
+        /// Обрабатывает запрос на выход пользователя из системы
+        /// Удаляет куки, связанные с аутентификацией, и очищает сессию
+        /// </summary>
+        /// <returns>Перенаправляет на главную страницу гостевой книги после успешного выхода</returns>
+        public ActionResult Logout()
+        {
+            Response.Cookies.Delete("login"); // Удаляем куки, связанные с аутентификацией
 
+            HttpContext.Session.Clear(); // Очищаем текущую сессию
 
-
-
-
-        //==============================================================
-        //public IActionResult Index()
-        //{
-        //    return View();
-        //}
+            return RedirectToAction("Index", "GuestBook"); // Перенаправляем пользователя на главную страницу гостевой книги после успешного выхода
+        }
     }
 }

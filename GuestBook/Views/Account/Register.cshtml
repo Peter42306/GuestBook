@@ -30,8 +30,11 @@
                 <span asp-validation-for="PasswordConfirm" class="text-danger"></span>
             </div>
             <div class="form-group mb-3">
-                <input type="submit" value="Зарегестрировать пользователя в базе данных" class="btn btn-primary" />
+                <input type="submit" value="Зарегистрировать пользователя в базе данных" class="btn btn-primary" />
             </div>
+            <div class="form-group mb-3">
+                <a asp-action="Index" asp-controller="GuestBook" class="btn btn-warning">Вернуться на домашнюю страницу</a>
+            </div>            
         </form>
     </div>
 </div>
