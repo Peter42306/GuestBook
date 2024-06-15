@@ -18,15 +18,22 @@ namespace GuestBook.Controllers
     /// </summary>
     public class AccountController : Controller
     {
-        private readonly GuestBookContext _context;
+        private readonly GuestBookContext _context;        
+
         private readonly ISaltGenerator _saltGenerator;
         private readonly IPasswordHasher _passwordHasher;
 
-        public AccountController(GuestBookContext context, ISaltGenerator saltGenerator, IPasswordHasher passwordHasher)
+        MyLoggerTXT _myLoggerTxt;
+        MyLoggerXlsx _myLoggerXlsx;
+               
+
+        public AccountController(GuestBookContext context, ISaltGenerator saltGenerator, IPasswordHasher passwordHasher, MyLoggerTXT myLoggerTxt, MyLoggerXlsx myLoggerXlsx)
         {
             _context = context;
             _saltGenerator = saltGenerator;
             _passwordHasher = passwordHasher;
+            _myLoggerTxt = myLoggerTxt;
+            _myLoggerXlsx = myLoggerXlsx;
         }
 
         //==============================================================
@@ -41,10 +48,14 @@ namespace GuestBook.Controllers
 
             if (!string.IsNullOrEmpty(cookieValue))
             {
+                _myLoggerTxt.Log($"Пользователь {cookieValue} вошёл в систему (cookie value)");
+                _myLoggerXlsx.Log($"Пользователь {cookieValue} вошёл в систему (cookie value)");
+
                 HttpContext.Session.SetString("Name", cookieValue);// Сохранение имени пользователя в сессии
 
                 return RedirectToAction("Create", "Messages");// Пользователь уже залогинен, перенаправляем на страницу создания сообщений
             }
+
             return View(); // Представление страницы входа пользователя
         }
 
@@ -72,6 +83,10 @@ namespace GuestBook.Controllers
                 if (user == null)
                 {
                     ModelState.AddModelError("", "В базе данных такой пользователь не найден");
+
+                    _myLoggerTxt.Log($"Незарегистрированный пользователь {loginModel.Name} пытался войти в вистему");
+                    _myLoggerXlsx.Log($"Незарегистрированный пользователь {loginModel.Name} пытался войти в вистему");
+
                     return View(loginModel);
                 }
 
@@ -80,6 +95,9 @@ namespace GuestBook.Controllers
                 if (user.Password != _passwordHasher.HashPassword(loginModel.Password,user.Salt))
                 {
                     ModelState.AddModelError("", "Неверный пароль");
+
+                    _myLoggerTxt.Log($"Пользователь {loginModel.Name} ввёл неверный пароль");
+                    _myLoggerXlsx.Log($"Пользователь {loginModel.Name} ввёл неверный пароль");
                     return View(loginModel);
                 }
 
@@ -115,7 +133,10 @@ namespace GuestBook.Controllers
 
                 HttpContext.Session.SetString("Name", user.Name); // Сохранение информации о пользователе в сессии
 
-                return RedirectToAction("Create", "Messages");// перенаправляет пользователя на страницу создания сообщения, вызвав метод Create в контроллере Messages
+                _myLoggerTxt.Log($"Пользователь {user.Name} вошёл в систему (log in)");
+                _myLoggerXlsx.Log($"Пользователь {user.Name} вошёл в систему (log in)");
+
+                return RedirectToAction("Login", "Account");// перенаправляет пользователя на страницу авторизации
             }
 
             return View(loginModel);// представление Login будет возвращено вместе с моделью loginModel, что позволяет пользователю видеть введенные данные и сообщения об ошибках
@@ -147,6 +168,9 @@ namespace GuestBook.Controllers
             // Проверка на существование пользователя с таким же именем в базе данных
             if (_context.Users.Any(u => u.Name == registerModel.Name))
             {
+                _myLoggerTxt.Log($"Пользователь {registerModel.Name} попытался повторно зарегистрироваться");
+                _myLoggerXlsx.Log($"Пользователь {registerModel.Name} попытался повторно зарегистрироваться");
+
                 ModelState.AddModelError("Name", "Пользователь с таким именем уже существует в базе данных");
             }
 
@@ -173,8 +197,15 @@ namespace GuestBook.Controllers
                 cookieOptions.Expires = DateTime.Now.AddDays(1); // Устанавливаем срок действия куки на 1 день
                 Response.Cookies.Append("login", registerModel.Name, cookieOptions); // Добавляем куки в ответ с именем пользователя, чтобы позже использовать его для аутентификации
 
+                _myLoggerTxt.Log($"Пользователь {registerModel.Name} успешно прошёл регистрацию)");
+                _myLoggerXlsx.Log($"Пользователь {registerModel.Name} успешно прошёл регистрацию)");
+
                 return RedirectToAction("Login", "Account"); // Перенаправляем пользователя на страницу входа после успешной регистрации
             }
+
+            _myLoggerTxt.Log($"Пользователь {registerModel.Name} не прошёл валидацию формы при регистрации)");
+            _myLoggerXlsx.Log($"Пользователь {registerModel.Name} не прошёл валидацию формы при регистрации)");
+
             return View(registerModel); // Возвращаем представление с моделью регистрации для отображения ошибок валидации
         }
 
@@ -186,9 +217,15 @@ namespace GuestBook.Controllers
         /// <returns>Перенаправляет на главную страницу гостевой книги после успешного выхода</returns>
         public ActionResult Logout()
         {
+            var userName = HttpContext.Session.GetString("Name"); // Получаем имя пользователя из сессии
+
             Response.Cookies.Delete("login"); // Удаляем куки, связанные с аутентификацией
+                       
 
             HttpContext.Session.Clear(); // Очищаем текущую сессию
+
+            _myLoggerTxt.Log($"Пользователь {userName} вышел из системы (logout)");
+            _myLoggerXlsx.Log($"Пользователь {userName} вышел из системы (logout)");
 
             return RedirectToAction("Index", "GuestBook"); // Перенаправляем пользователя на главную страницу гостевой книги после успешного выхода
         }

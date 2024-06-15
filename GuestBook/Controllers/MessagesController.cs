@@ -1,4 +1,5 @@
 ﻿using GuestBook.Models;
+using GuestBook.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,10 +13,14 @@ namespace GuestBook.Controllers
     public class MessagesController : Controller
     {
         private readonly GuestBookContext _context;
+        MyLoggerTXT _myLoggerTxt;
+        MyLoggerXlsx _myLoggerXlsx;
 
-        public MessagesController(GuestBookContext context)
+        public MessagesController(GuestBookContext context, MyLoggerTXT myLoggerTxt, MyLoggerXlsx myLoggerXlsx)
         {
             _context = context;
+            _myLoggerTxt = myLoggerTxt;
+            _myLoggerXlsx = myLoggerXlsx;
         }
 
         // GET: Message/Create
@@ -56,13 +61,23 @@ namespace GuestBook.Controllers
                     _context.Messages.Add(message); // Добавляем сообщение в контекст базы данных и сохраняем изменения
                     _context.SaveChanges();
 
+                    _myLoggerTxt.Log($"Пользователь {userName} написал сообщение {message.MessageContent}");
+                    _myLoggerXlsx.Log($"Пользователь {userName} написал сообщение {message.MessageContent}");
+
                     return RedirectToAction(nameof(Create),"Messages"); // Перенаправляем на страницу создания сообщения снова                
                 }
                 else
                 {
+                    _myLoggerTxt.Log($"Пользователь {userName} не написал  сообщение так не найден в БД");
+                    _myLoggerXlsx.Log($"Пользователь {userName} не написал  сообщение так не найден в БД");
+
                     ModelState.AddModelError("", "Пользователь не найден"); // Если пользователь не найден, добавляем ошибку в ModelState
-                }
+                }                
             }
+
+            _myLoggerTxt.Log($"Пользователь {User.Identity.Name} не удалось отправить сообщение");
+            _myLoggerXlsx.Log($"Пользователь {User.Identity.Name} не удалось отправить сообщение");
+
             return View(message); // Возвращаем представление с сообщением для исправления ошибок
         }        
     }

@@ -25,6 +25,8 @@ builder.Services.AddControllersWithViews(); // Добавляются сервисы MVC, что позв
 
 builder.Services.AddSaltGeneratorService(); // Сервис для генерирования соли
 builder.Services.AddPasswordHasherService(); // Сервис для хеширования паролей
+builder.Services.AddMyLoggerTxt();
+builder.Services.AddMyLoggerXlsx();
 
 var app = builder.Build(); // Построение и конфигурирование middleware. Создается объект app, представляющий построенное приложение.
 

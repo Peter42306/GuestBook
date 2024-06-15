@@ -10,12 +10,11 @@ namespace GuestBook.Models
     public class GuestBookContext : DbContext
     {
         //private readonly ISaltGenerator _saltGenerator;
-        //private readonly IPasswordHasher _passwordHasher;
+        //private readonly IPasswordHasher _passwordHasher;        
 
         // Конструктор контекста
         public GuestBookContext(DbContextOptions<GuestBookContext> options) : base(options)
-        {
-            
+        {            
             Database.EnsureCreated(); // Создаем базу данных, если она не существует            
         }
 
@@ -30,27 +29,27 @@ namespace GuestBook.Models
             // Создаем список пользователей для инициализации данных
             var users = new List<User>
             {
-                CreateUser(1,"User 1","12345678"),
-                CreateUser(2, "User 2", "12345678"),
-                CreateUser(3, "User 3", "12345678")
+                CreateUser(1,"User 112","12345678"),
+                //CreateUser(2, "User 2", "12345678"),
+                //CreateUser(3, "User 3", "12345678")
             };
 
             modelBuilder.Entity<User>().HasData(users);
 
             modelBuilder.Entity<Message>().HasData(
-                new Message { Id = 1, MessageContent = "Hello World 1", MessageDate = DateTime.Now, UserId = 1 },
-                new Message { Id = 2, MessageContent = "Hello World 2", MessageDate = DateTime.Now, UserId = 2 },
-                new Message { Id = 3, MessageContent = "Hello World 3", MessageDate = DateTime.Now, UserId = 3 },
-                new Message { Id = 4, MessageContent = "Hello World 4", MessageDate = DateTime.Now, UserId = 3 },
-                new Message { Id = 5, MessageContent = "Hello World 5", MessageDate = DateTime.Now, UserId = 2 },
-                new Message { Id = 6, MessageContent = "Hello World 6", MessageDate = DateTime.Now, UserId = 3 },
-                new Message { Id = 7, MessageContent = "Hello World 7", MessageDate = DateTime.Now, UserId = 2 },
-                new Message { Id = 8, MessageContent = "Hello World 8", MessageDate = DateTime.Now, UserId = 2 },
-                new Message { Id = 9, MessageContent = "Hello World 9", MessageDate = DateTime.Now, UserId = 1 },
-                new Message { Id = 10, MessageContent = "Hello World 10", MessageDate = DateTime.Now, UserId = 1 },
-                new Message { Id = 11, MessageContent = "Hello World 11", MessageDate = DateTime.Now, UserId = 2 },
-                new Message { Id = 12, MessageContent = "Hello World 12", MessageDate = DateTime.Now, UserId = 2 },
-                new Message { Id = 13, MessageContent = "Hello World 13", MessageDate = DateTime.Now, UserId = 3 }
+                new Message { Id = 1, MessageContent = "Hello World 1", MessageDate = DateTime.Now, UserId = 1 }
+                //new Message { Id = 2, MessageContent = "Hello World 2", MessageDate = DateTime.Now, UserId = 2 },
+                //new Message { Id = 3, MessageContent = "Hello World 3", MessageDate = DateTime.Now, UserId = 3 },
+                //new Message { Id = 4, MessageContent = "Hello World 4", MessageDate = DateTime.Now, UserId = 3 },
+                //new Message { Id = 5, MessageContent = "Hello World 5", MessageDate = DateTime.Now, UserId = 2 },
+                //new Message { Id = 6, MessageContent = "Hello World 6", MessageDate = DateTime.Now, UserId = 3 },
+                //new Message { Id = 7, MessageContent = "Hello World 7", MessageDate = DateTime.Now, UserId = 2 },
+                //new Message { Id = 8, MessageContent = "Hello World 8", MessageDate = DateTime.Now, UserId = 2 },
+                //new Message { Id = 9, MessageContent = "Hello World 9", MessageDate = DateTime.Now, UserId = 1 },
+                //new Message { Id = 10, MessageContent = "Hello World 10", MessageDate = DateTime.Now, UserId = 1 },
+                //new Message { Id = 11, MessageContent = "Hello World 11", MessageDate = DateTime.Now, UserId = 2 },
+                //new Message { Id = 12, MessageContent = "Hello World 12", MessageDate = DateTime.Now, UserId = 2 },
+                //new Message { Id = 13, MessageContent = "Hello World 13", MessageDate = DateTime.Now, UserId = 3 }
                 );
         }
 
