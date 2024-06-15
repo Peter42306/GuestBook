@@ -2,15 +2,20 @@
 using System.Security.Cryptography;
 using System.Text;
 using GuestBook.Helpers;
+using GuestBook.Services;
 
 namespace GuestBook.Models
 {
     // Контекст базы данных для гостевой книги
     public class GuestBookContext : DbContext
     {
+        //private readonly ISaltGenerator _saltGenerator;
+        //private readonly IPasswordHasher _passwordHasher;
+
         // Конструктор контекста
         public GuestBookContext(DbContextOptions<GuestBookContext> options) : base(options)
         {
+            
             Database.EnsureCreated(); // Создаем базу данных, если она не существует            
         }
 

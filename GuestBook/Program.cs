@@ -1,4 +1,5 @@
 using GuestBook.Models;
+using GuestBook.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
@@ -21,6 +22,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddControllersWithViews(); // Добавляются сервисы MVC, что позволяет работать с контроллерами и представлениями.
+
+builder.Services.AddSaltGeneratorService(); // Сервис для генерирования соли
+builder.Services.AddPasswordHasherService(); // Сервис для хеширования паролей
 
 var app = builder.Build(); // Построение и конфигурирование middleware. Создается объект app, представляющий построенное приложение.
 

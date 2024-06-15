@@ -7,6 +7,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using GuestBook.Services;
 
 namespace GuestBook.Controllers
 {    
@@ -18,10 +19,14 @@ namespace GuestBook.Controllers
     public class AccountController : Controller
     {
         private readonly GuestBookContext _context;
+        private readonly ISaltGenerator _saltGenerator;
+        private readonly IPasswordHasher _passwordHasher;
 
-        public AccountController(GuestBookContext context)
+        public AccountController(GuestBookContext context, ISaltGenerator saltGenerator, IPasswordHasher passwordHasher)
         {
             _context = context;
+            _saltGenerator = saltGenerator;
+            _passwordHasher = passwordHasher;
         }
 
         //==============================================================
@@ -72,11 +77,19 @@ namespace GuestBook.Controllers
 
 
                 // Проверка пароля
-                if (user.Password != Utilities.HashPassword(loginModel.Password, user.Salt))
+                if (user.Password != _passwordHasher.HashPassword(loginModel.Password,user.Salt))
                 {
                     ModelState.AddModelError("", "Неверный пароль");
                     return View(loginModel);
                 }
+
+
+                //// Проверка пароля
+                //if (user.Password != Utilities.HashPassword(loginModel.Password, user.Salt))
+                //{
+                //    ModelState.AddModelError("", "Неверный пароль");
+                //    return View(loginModel);
+                //}
 
 
                 // Создание Claims, (утверждение) представляет единичную информацию о пользователе (например, его имя)
@@ -143,9 +156,15 @@ namespace GuestBook.Controllers
                 User user = new User(); // Создаем новый объект пользователя
                 user.Name = registerModel.Name; // Генерируем случайную строку (соль) для шифрования пароля
 
-                string salt = Utilities.GenerateSalt(); // Генерируем случайную строку (соль) для шифрования пароля
-                user.Password = Utilities.HashPassword(registerModel.Password, salt); // // Хешируем пароль из модели регистрации, используя соль, и устанавливаем хешированный пароль в объект пользователя
-                user.Salt = salt; // Устанавливаем соль в объект пользователя
+                // соль и хеширование с помощью статических методов 
+                //string salt = Utilities.GenerateSalt(); // Генерируем случайную строку (соль) для шифрования пароля
+                //user.Password = Utilities.HashPassword(registerModel.Password, salt); // // Хешируем пароль из модели регистрации, используя соль, и устанавливаем хешированный пароль в объект пользователя
+                //user.Salt = salt; // Устанавливаем соль в объект пользователя
+
+                // соль и хеширование с помощью сервисов 
+                string salt =_saltGenerator.GenerateSalt();
+                user.Password = _passwordHasher.HashPassword(registerModel.Password, salt);
+                user.Salt= salt;
 
                 _context.Users.Add(user); // Добавляем пользователя в контекст базы данных
                 _context.SaveChanges(); // Сохраняем изменения в базе данных
