@@ -136,7 +136,7 @@ namespace GuestBook.Controllers
                 _myLoggerTxt.Log($"Пользователь {user.Name} вошёл в систему (log in)");
                 _myLoggerXlsx.Log($"Пользователь {user.Name} вошёл в систему (log in)");
 
-                return RedirectToAction("Login", "Account");// перенаправляет пользователя на страницу авторизации
+                return RedirectToAction("Index", "GuestBook");// перенаправляет пользователя на домашнюю страницу
             }
 
             return View(loginModel);// представление Login будет возвращено вместе с моделью loginModel, что позволяет пользователю видеть введенные данные и сообщения об ошибках

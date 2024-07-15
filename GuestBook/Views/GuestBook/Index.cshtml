@@ -1,13 +1,13 @@
 ﻿@model IEnumerable<GuestBook.Models.Message>
 
 @{
-	ViewData["Title"] = "Гостевой режим";
+	ViewData["Title"] = User.Identity.IsAuthenticated ? User.Identity.Name : "Гостевой режим";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <h6>View/GuestBook/Index</h6>
-<h6>Title -> Гостевой режим</h6>
-<h6>Есть возможность только читать сообщения</h6>
+<h6>Title -> @(User.Identity.IsAuthenticated ? User.Identity.Name : "Гостевой режим")</h6>
+<h6>@(User.Identity.IsAuthenticated ? "Добро пожаловать, " + User.Identity.Name : "Есть возможность только читать сообщения")</h6>
 
 <p>
 	<a asp-controller="Account" asp-action="Login" class="btn btn-primary">Вход в систему</a>
