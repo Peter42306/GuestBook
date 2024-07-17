@@ -2,6 +2,7 @@
 using GuestBook.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GuestBook.Controllers
 {
@@ -31,8 +32,17 @@ namespace GuestBook.Controllers
         [Authorize] // Атрибут для требования аутентификации перед доступом к этому действию
         public IActionResult Create()
         {
+            var viewModel = new CreateMessageViewModel
+            {
+                NewMessage = new Message(),
+                Messages = _context.Messages
+                .Include(m => m.User)
+                .OrderByDescending(m => m.MessageDate)
+                .ToList()
+            };
+
             ViewData["Name"] = HttpContext.Session.GetString("Name"); // Передаем в представление имя пользователя из сессии
-            return View(); // Представление для создания нового сообщения
+            return View(viewModel); // Представление для создания нового сообщения
         }
 
         // POST: Message/Create
@@ -44,7 +54,7 @@ namespace GuestBook.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize] // Атрибут для требования аутентификации перед доступом к этому действию
-        public IActionResult Create([Bind("MessageContent")] Message message)
+        public IActionResult Create(Message newMessage)
         {
             // Проверяем, прошла ли модель валидацию
             if (ModelState.IsValid)
@@ -55,14 +65,14 @@ namespace GuestBook.Controllers
                 // Если пользователь найден
                 if (user != null)
                 {
-                    message.UserId = user.Id; // Устанавливаем ID пользователя и дату сообщения
-                    message.MessageDate= DateTime.Now;
+                    newMessage.UserId = user.Id; // Устанавливаем ID пользователя и дату сообщения
+                    newMessage.MessageDate= DateTime.Now;
 
-                    _context.Messages.Add(message); // Добавляем сообщение в контекст базы данных и сохраняем изменения
+                    _context.Messages.Add(newMessage); // Добавляем сообщение в контекст базы данных и сохраняем изменения
                     _context.SaveChanges();
 
-                    _myLoggerTxt.Log($"Пользователь {userName} написал сообщение {message.MessageContent}");
-                    _myLoggerXlsx.Log($"Пользователь {userName} написал сообщение {message.MessageContent}");
+                    _myLoggerTxt.Log($"Пользователь {userName} написал сообщение {newMessage.MessageContent}");
+                    _myLoggerXlsx.Log($"Пользователь {userName} написал сообщение {newMessage.MessageContent}");
 
                     return RedirectToAction(nameof(Create),"Messages"); // Перенаправляем на страницу создания сообщения снова                
                 }
@@ -78,7 +88,13 @@ namespace GuestBook.Controllers
             _myLoggerTxt.Log($"Пользователь {User.Identity.Name} не удалось отправить сообщение");
             _myLoggerXlsx.Log($"Пользователь {User.Identity.Name} не удалось отправить сообщение");
 
-            return View(message); // Возвращаем представление с сообщением для исправления ошибок
+            var viewModel = new CreateMessageViewModel
+            {
+                NewMessage = newMessage,
+                Messages = _context.Messages.Include(m => m.User).OrderByDescending(m => m.MessageDate).ToList()
+            };
+
+            return View(viewModel); // Возвращаем представление с сообщением для исправления ошибок
         }        
     }
 }
