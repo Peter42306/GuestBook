@@ -13,26 +13,21 @@
 
 
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-12">
         <form asp-action="Create">
             <div class="form-group mb-3">
                 <label asp-for="NewMessage.MessageContent" class="control-label"></label>
                 <textarea asp-for="NewMessage.MessageContent" class="form-control"></textarea>
                 <span asp-validation-for="NewMessage.MessageContent" class="text-danger"></span>
             </div>
-            <div class="form-group mb-3">                
-                <input type="submit" value="Добавить сообщение в базу данных" class="btn btn-primary"/>                
-            </div>            
-            <div class="form-group mb-3">
+            <div class="form-group mb-12 d-flex flex-wrap gap-2">
+                <input type="submit" value="Добавить сообщение в базу данных" class="btn btn-primary" />
                 <a asp-action="Logout" asp-controller="Account" class="btn btn-danger">Выход из системы на домашнюю страницу (logout)</a>
-            </div>
-            <div class="form-group mb-3">
                 <a asp-action="Index" asp-controller="GuestBook" class="btn btn-warning">Вернуться на домашнюю страницу</a>
             </div>
         </form>
     </div>
 </div>
-
 
 <table class="table table-striped">
     <thead>

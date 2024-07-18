@@ -1,18 +1,28 @@
 ﻿@model IEnumerable<GuestBook.Models.Message>
 
 @{
-	ViewData["Title"] = User.Identity.IsAuthenticated ? User.Identity.Name : "Гостевой режим";
-	Layout = "~/Views/Shared/_Layout.cshtml";
+	var userName = Context.Session.GetString("Name");
 }
 
 <h6>View/GuestBook/Index</h6>
-<h6>Title -> @(User.Identity.IsAuthenticated ? User.Identity.Name : "Гостевой режим")</h6>
-<h6>@(User.Identity.IsAuthenticated ? "Добро пожаловать, " + User.Identity.Name : "Есть возможность только читать сообщения")</h6>
 
-<p>
+@if (!string.IsNullOrEmpty(userName))
+{
+	<h6>Привет, @userName! Войди с систему, чтобы написать своё сообщение</h6>
+	<hr />
+}
+else
+{
+	<h6>Title -> Гостевой режим</h6>
+	<h6>Привет, гость! Пожалуйста, войдите, чтобы оставить сообщение</h6>
+	<hr />
+}
+
+<div class="form-group mb-12 d-flex flex-wrap gap-2">
 	<a asp-controller="Account" asp-action="Login" class="btn btn-primary">Вход в систему</a>
-	<a asp-controller="Account" asp-action="Register" class="btn btn-primary">Регистрация</a>
-</p>
+	<a asp-controller="Account" asp-action="Register" class="btn btn-info">Регистрация</a>
+	<a asp-controller="Account" asp-action="Logout" class="btn btn-warning">Выход из системы</a>
+</div>
 
 <table class="table table-striped">
 	<thead>

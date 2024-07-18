@@ -193,14 +193,14 @@ namespace GuestBook.Controllers
                 _context.Users.Add(user); // Добавляем пользователя в контекст базы данных
                 _context.SaveChanges(); // Сохраняем изменения в базе данных
                                 
-                CookieOptions cookieOptions = new CookieOptions(); // При успешной регистрации устанавливаем куки для аутентификации пользователя
-                cookieOptions.Expires = DateTime.Now.AddDays(1); // Устанавливаем срок действия куки на 1 день
-                Response.Cookies.Append("login", registerModel.Name, cookieOptions); // Добавляем куки в ответ с именем пользователя, чтобы позже использовать его для аутентификации
+                //CookieOptions cookieOptions = new CookieOptions(); // При успешной регистрации устанавливаем куки для аутентификации пользователя
+                //cookieOptions.Expires = DateTime.Now.AddDays(1); // Устанавливаем срок действия куки на 1 день
+                //Response.Cookies.Append("login", registerModel.Name, cookieOptions); // Добавляем куки в ответ с именем пользователя, чтобы позже использовать его для аутентификации
 
                 _myLoggerTxt.Log($"Пользователь {registerModel.Name} успешно прошёл регистрацию)");
                 _myLoggerXlsx.Log($"Пользователь {registerModel.Name} успешно прошёл регистрацию)");
 
-                return RedirectToAction("Login", "Account"); // Перенаправляем пользователя на страницу входа после успешной регистрации
+                return RedirectToAction("Index", "GuestBook"); // Перенаправляем пользователя на страницу входа после успешной регистрации
             }
 
             _myLoggerTxt.Log($"Пользователь {registerModel.Name} не прошёл валидацию формы при регистрации)");
